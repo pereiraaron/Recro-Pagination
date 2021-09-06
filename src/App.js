@@ -1,23 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import {
+  fetchData,
+  updateNumberOfDetails,
+  updatePage,
+} from "./actions/pageActions";
+import Card from "./components/Card";
 
 function App() {
+  const dispatch = useDispatch();
+  const scroll = useSelector((state) => state.scroll);
+  const { page, numberOfDetails, pagedata } = scroll;
+
+  useEffect(() => {
+    if (numberOfDetails < 100) {
+      dispatch(fetchData(numberOfDetails));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  window.onscroll = () => {
+    if (
+      window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight &&
+      numberOfDetails < 100
+    ) {
+      dispatch(updateNumberOfDetails());
+      dispatch(updatePage());
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="container">
+        {pagedata.length > 0 &&
+          pagedata.map((item) => {
+            return <Card item={item} key={item.id} />;
+          })}
+      </div>
     </div>
   );
 }
